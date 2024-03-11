@@ -59,6 +59,26 @@ paths:
         500:
           $ref: '#/components/responses/500'
 
+  /account/{id}:
+    put:
+      tags:
+        - Account
+      operationId: updateAccountById
+      summary: update account by an id
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        200:
+          description: updated account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAccountDto'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+
 components:
   parameters:
     ## Common path with /{id} param
