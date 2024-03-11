@@ -20,6 +20,14 @@ paths:
               example: pong
 
 components:
+  parameters:
+    ## Common path with /{id} param
+    idPath:
+      name: id
+      in: path
+      schema:
+        type: string
+
   responses:
     404:
       description: resource not found
