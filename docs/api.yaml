@@ -60,6 +60,22 @@ paths:
           $ref: '#/components/responses/500'
 
   /account/{id}:
+    get:
+      tags:
+        - Account
+      operationId: getAccountById
+      summary: get account by an id
+      responses:
+        200:
+          description: account data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAccountDto'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
     put:
       tags:
         - Account
