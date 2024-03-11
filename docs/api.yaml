@@ -129,17 +129,17 @@ components:
           type: string
           format: date
           description: age should be greater than 21
-        net_month_salary:
+        netMonthSalary:
           type: number
           format: double
-        account_number:
+        accountNumber:
           type: string
       required:
         - firstname
         - lastname
         - birthdate
-        - net_month_salary
-        - account_number
+        - netMonthSalary
+        - accountNumber
     GetAccountDto:
       type: object
       allOf:
