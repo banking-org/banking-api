@@ -58,3 +58,32 @@ components:
           example: 404
         message:
           type: string
+    UpSetAccountDto:
+      type: object
+      properties:
+        firstname:
+          type: string
+        lastname:
+          type: string
+        birthdate:
+          type: string
+          format: date
+          description: age should be greater than 21
+        net_month_salary:
+          type: number
+          format: double
+        account_number:
+          type: string
+      required:
+        - firstname
+        - lastname
+        - birthdate
+        - net_month_salary
+        - account_number
+    GetAccountDto:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/UpSetAccountDto'
+      properties:
+        id:
+          type: string
