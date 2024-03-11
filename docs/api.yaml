@@ -18,6 +18,46 @@ paths:
               schema:
                 type: string
               example: pong
+  /account:
+    get:
+      tags:
+        - Account
+      operationId: getAllAccounts
+      summary: get a list of all accounts
+      responses:
+        200:
+          description: account list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetAccountDto'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+    post:
+      tags:
+        - Account
+      operationId: createAccount
+      summary: create a bank account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpSetAccountDto'
+      responses:
+        201:
+          description: created account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAccountDto'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
 
 components:
   parameters:
