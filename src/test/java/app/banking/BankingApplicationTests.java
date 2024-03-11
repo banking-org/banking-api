@@ -1,4 +1,4 @@
-package app.banking.banking;
+package app.banking;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
