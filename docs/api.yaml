@@ -6,3 +6,15 @@ info:
 servers:
   - url: 'https'
 paths:
+  /ping:
+    get:
+      tags:
+        - Health
+      responses:
+        200:
+          description: OK
+          content:
+            plain/text:
+              schema:
+                type: string
+              example: pong
