@@ -255,6 +255,23 @@ components:
         account:
           $ref: '#/components/schemas/GetAccountDto'
 
+    CommonDepositPayload:
+      type: object
+      properties:
+        accountId:
+          type: string
+        amount:
+          type: number
+          format: double
+        label:
+          type: string
+        effectDate:
+          type: string
+          format: date
+        registerDate:
+          type: string
+          format: date
+
     MoneyData:
       type: object
       properties:
