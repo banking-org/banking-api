@@ -65,6 +65,8 @@ paths:
         - Account
       operationId: getAccountById
       summary: get account by an id
+      parameters:
+        - $ref: '#/components/parameters/idPath'
       responses:
         200:
           description: account data
