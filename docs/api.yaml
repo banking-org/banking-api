@@ -296,6 +296,20 @@ components:
           type: string
           format: date
 
+    TransferMoneyPayload:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CommonDepositPayload'
+      properties:
+        accountIdTarget:
+          type: string
+        status:
+          type: string
+          enum:
+            - PENDING
+            - CANCELED
+            - SUCCESS
+
     MoneyData:
       type: object
       properties:
