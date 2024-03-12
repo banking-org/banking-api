@@ -128,6 +128,30 @@ paths:
         500:
           $ref: '#/components/responses/500'
 
+  /money/deposit:
+    post:
+      tags:
+        - Money
+      summary: add some money to account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonDepositPayload'
+      responses:
+        200:
+          description: transaction success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoneyData'
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+
 components:
   parameters:
     ## Common path with /{id} param
