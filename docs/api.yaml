@@ -170,7 +170,13 @@ components:
           format: double
         accountNumber:
           type: string
-
+        type:
+          type: string
+          enum:
+            - NORMAL
+            - DEBIT
+          default:
+            NORMAL
       required:
         - firstname
         - lastname
