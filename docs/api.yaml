@@ -112,6 +112,24 @@ components:
         type: string
         required: true
 
+    fromDate:
+      name: from
+      in: query
+      description: Start date for statement retrieval
+      required: true
+      schema:
+        type: string
+        format: date
+
+    toDate:
+      name: to
+      in: query
+      description: End date for statement retrieval
+      required: true
+      schema:
+        type: string
+        format: date
+
   responses:
     400:
       description: Bad request
