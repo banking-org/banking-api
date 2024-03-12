@@ -393,3 +393,13 @@ components:
         balance:
           type: number
           format: double
+
+    InterestPercentPayload:
+      type: object
+      properties:
+        firstWeek:
+          type: number
+        nextWeeks:
+          type: number
+      required:
+        - firstWeek
