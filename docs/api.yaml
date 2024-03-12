@@ -18,6 +18,7 @@ paths:
               schema:
                 type: string
               example: pong
+
   /account:
     get:
       tags:
@@ -74,6 +75,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetAccountDto'
+        400:
+          $ref: '#/components/responses/400'
         404:
           $ref: '#/components/responses/404'
         500:
@@ -92,6 +95,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetAccountDto'
+        400:
+          $ref: '#/components/responses/400'
         404:
           $ref: '#/components/responses/404'
         500:
@@ -105,8 +110,19 @@ components:
       in: path
       schema:
         type: string
+        required: true
 
   responses:
+    400:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseErrorPayload'
+          example:
+            status: 400
+            message: Bad request
+
     404:
       description: resource not found
       content:
@@ -116,6 +132,7 @@ components:
           example:
             status: 404
             message: resource not found
+
     500:
       description: Server error
       content:
@@ -136,6 +153,7 @@ components:
           example: 404
         message:
           type: string
+
     UpSetAccountDto:
       type: object
       properties:
@@ -152,12 +170,14 @@ components:
           format: double
         accountNumber:
           type: string
+
       required:
         - firstname
         - lastname
         - birthdate
         - netMonthSalary
         - accountNumber
+
     GetAccountDto:
       type: object
       allOf:
