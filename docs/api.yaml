@@ -348,3 +348,23 @@ components:
         currentInterest:
           type: number
           description: a percentage of interest a week for debit account type
+
+    AccountStatement:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        reference:
+          type: string
+        label:
+          type: string
+        withdraw:
+          type: number
+          format: double
+        deposit:
+          type: number
+          format: double
+        balance:
+          type: number
+          format: double
