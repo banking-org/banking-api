@@ -21,6 +21,6 @@ public class Credits {
   @Column(defaultValue="now()")
   private Instant date;
 
-  @Column(name="id_account", required=true)
+  @Column(name="id_account", references=true)
   private Account accountId;
 }
