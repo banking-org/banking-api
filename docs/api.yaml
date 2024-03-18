@@ -205,11 +205,11 @@ components:
   parameters:
     ## Common path with /{id} param
     idPath:
+      required: true
       name: id
       in: path
       schema:
         type: number
-        required: true
 
     fromDate:
       name: from
@@ -230,7 +230,7 @@ components:
         format: date
 
   responses:
-    400:
+    '400':
       description: Bad request
       content:
         application/json:
@@ -240,7 +240,7 @@ components:
             status: 400
             message: Bad request
 
-    404:
+    '404':
       description: resource not found
       content:
         application/json:
@@ -250,7 +250,7 @@ components:
             status: 404
             message: resource not found
 
-    500:
+    '500':
       description: Server error
       content:
         application/json:
