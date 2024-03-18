@@ -1,5 +1,6 @@
 package app.banking.configuration;
 
+import app.banking.models.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,16 @@ public class Migrates {
     Migration migration = new Migration(
         "src/main/resources/migrations",
         pool
+    );
+    migration.init(
+      Account.class,
+      Balance.class,
+      Interest.class,
+      PlanedTransfer.class,
+      Transaction.class,
+      TransactionGroup.class,
+      Transfer.class,
+      Credits.class
     );
     migration.readAllIn("alter");
     log.info("migration done !");
