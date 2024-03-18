@@ -208,7 +208,7 @@ components:
       name: id
       in: path
       schema:
-        type: string
+        type: number
         required: true
 
     fromDate:
@@ -307,13 +307,13 @@ components:
         - $ref: '#/components/schemas/UpSetAccountDto'
       properties:
         id:
-          type: string
+          type: number
 
     WithdrawMoneyPayload:
       type: object
       properties:
         accountId:
-          type: string
+          type: number
         amount:
           type: number
           format: double
@@ -332,7 +332,7 @@ components:
       type: object
       properties:
         accountId:
-          type: string
+          type: number
         amount:
           type: number
           format: double
@@ -351,7 +351,7 @@ components:
         - $ref: '#/components/schemas/CommonDepositPayload'
       properties:
         accountIdTarget:
-          type: string
+          type: number
         status:
           type: string
           enum:
@@ -403,3 +403,14 @@ components:
           type: number
       required:
         - firstWeek
+
+    ## EPIC 2
+    MoneyState:
+      type: object
+      properties:
+        current_balance:
+          type: number
+        total_outcomes:
+          type: number
+        total_incomes:
+          type: number
