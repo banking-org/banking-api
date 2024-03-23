@@ -3,6 +3,8 @@ info:
   title: Banking app
   description: A simple banking app api
   version: 0.3.0
+  contact:
+    name: banking-org
 servers:
   - url: 'https'
 paths:
