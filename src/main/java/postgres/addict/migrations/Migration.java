@@ -24,12 +24,12 @@ public class Migration {
       TableDefinition<?> tableDefinition = new TableDefinition<>(entity);
       String tableName = tableDefinition.getName();
       tableDefinition.getColumns()
-          .stream()
-          .filter(ColumnDefinition::isReferences)
-          .forEach(columnDefinition -> {
-            Class<?> clazz = columnDefinition.getRefTableDefinition().getClazz();
-            new Migration(path, pool).init(clazz);
-          });
+        .stream()
+        .filter(ColumnDefinition::isReferences)
+        .forEach(columnDefinition -> {
+          Class<?> clazz = columnDefinition.getRefTableDefinition().getClazz();
+          new Migration(path, pool).init(clazz);
+        });
 
       try  {
 
@@ -46,7 +46,9 @@ public class Migration {
   @SneakyThrows
   public void readAllIn(String subPath){
     Path root = Path.of(this.path, subPath);
-    Files.list(root).forEach(this::readFile);
+    if (Files.exists(root)) {
+      Files.list(root).forEach(this::readFile);
+    }
   }
 
   @SneakyThrows
