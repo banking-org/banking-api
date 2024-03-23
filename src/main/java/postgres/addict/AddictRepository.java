@@ -46,7 +46,6 @@ public class AddictRepository<T> {
   }
 
   @SneakyThrows
-  @SuppressWarnings("unchecked")
   private HashMap<String, Object> getInsertedValues(T value){
     HashMap<String, Object> entries = new HashMap<>();
 
@@ -60,16 +59,16 @@ public class AddictRepository<T> {
       if(columnValue != null){
         if(column.isReferences()){
           Object v = column
-              .getRefTableDefinition()
-              .getColumnIdentity()
-              .getField()
-              .get(column);
+            .getRefTableDefinition()
+            .getColumnIdentity()
+            .getField()
+            .get(columnValue);
           if(v instanceof Enum<?>){
             v = ((Enum<?>) v).name();
           }
           entries.put(
-              column.getName(),
-              v
+            column.getName(),
+            v
           );
         }else {
           if(columnValue instanceof Enum<?>){
@@ -92,12 +91,12 @@ public class AddictRepository<T> {
       if(columnValue != null){
         if(column.isReferences()){
           entries.put(
-              column.getName(),
-              column
-                  .getRefTableDefinition()
-                  .getColumnIdentity()
-                  .getField()
-                  .get(column)
+            column.getName(),
+            column
+              .getRefTableDefinition()
+              .getColumnIdentity()
+              .getField()
+              .get(column)
           );
         }else {
           entries.put(column.getName(), columnValue);
@@ -123,7 +122,6 @@ public class AddictRepository<T> {
     String columns = String.join(",", inserted.keySet());
     String params = String.join(",", createParameters(inserted.size()));
     String query = "INSERT INTO \"@table\" (" + columns + ") values (" + params + ") RETURNING *";
-    System.out.println(query);
     PreparedStatement statement = createStatement(query);
 
     List<Object> values = inserted.values().stream().toList();
@@ -143,9 +141,9 @@ public class AddictRepository<T> {
   protected PreparedStatement createStatement(String sql) {
     Connection connection = Pool.registry.getConnection();
     String query = sql
-        .replaceAll("@table", this.tableName)
-        .replaceAll("@id", this.idColumnName)
-    ;
+      .replaceAll("@table", this.tableName)
+      .replaceAll("@id", this.idColumnName)
+      ;
     return connection.prepareStatement(query);
   }
 
@@ -174,8 +172,8 @@ public class AddictRepository<T> {
   @SneakyThrows
   protected List<T> resultSetList(PreparedStatement statement){
     final List<T> result = this
-        .resultSetMapper
-        .enlistResultSet(statement.executeQuery());
+      .resultSetMapper
+      .enlistResultSet(statement.executeQuery());
     Pool.registry.releaseConnection(statement.getConnection());
     return result;
   }
@@ -183,8 +181,8 @@ public class AddictRepository<T> {
   @SneakyThrows
   protected Optional<T> resultSetOptional(PreparedStatement statement){
     final Optional<T> result = this
-        .resultSetMapper
-        .optionalResultSet(statement.executeQuery());
+      .resultSetMapper
+      .optionalResultSet(statement.executeQuery());
     Pool.registry.releaseConnection(statement.getConnection());
     return result;
   }
@@ -192,8 +190,8 @@ public class AddictRepository<T> {
   @SneakyThrows
   protected T forceResultSet(PreparedStatement statement){
     final T result = this
-        .resultSetMapper
-        .mustBeOneResultSet(statement.executeQuery());
+      .resultSetMapper
+      .mustBeOneResultSet(statement.executeQuery());
     Pool.registry.releaseConnection(statement.getConnection());
     return result;
   }
