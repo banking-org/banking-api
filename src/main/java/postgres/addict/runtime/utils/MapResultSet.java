@@ -1,6 +1,5 @@
 package postgres.addict.runtime.utils;
 
-import lombok.Data;
 import lombok.SneakyThrows;
 import postgres.addict.runtime.definition.ColumnDefinition;
 import postgres.addict.runtime.definition.TableDefinition;
@@ -9,6 +8,7 @@ import java.lang.reflect.Field;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -27,15 +27,17 @@ public class MapResultSet<T> {
     this.orderedColumns.addAll(definition.getColumns());
   }
 
-  public Object mapper(Object value, ColumnDefinition colDef){
-    Class<?> type = colDef.getField().getType();
-    if(value instanceof Date){
-      if(type.equals(LocalDate.class)){
+  public Object mapper(Object value, ColumnDefinition colDef, String column){
+    if(colDef.getName().equals(column)){
+      Class<?> type = colDef.getField().getType();
+
+      if(value instanceof Date && type.equals(LocalDate.class)){
         return ((Date) value).toLocalDate();
-      }else if(type.equals(Instant.class)) {
-        return ((Date) value).toInstant();
       }
-      return value;
+
+      if(value instanceof Timestamp && type.equals(Instant.class)){
+        return ((Timestamp) value).toInstant();
+      }
     }
     return value;
   }
@@ -55,7 +57,11 @@ public class MapResultSet<T> {
       String tableName = resMeta.getTableName(i);
 
       for (ColumnDefinition orderedColumn : this.orderedColumns) {
-        Object columnValue = mapper(resultSet.getObject(i), orderedColumn);
+        Object columnValue = mapper(
+          resultSet.getObject(i),
+          orderedColumn,
+          columnName
+        );
 
         if(
           this.tableName.equals(tableName) &&
