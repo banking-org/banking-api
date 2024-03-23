@@ -26,7 +26,6 @@ public class Pool implements ConnectionPool {
     this.connectionPool = pool;
   }
 
-
   /**
    * create a pool connection for all the app globally
    */
