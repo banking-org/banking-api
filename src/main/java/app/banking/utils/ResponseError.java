@@ -1,3 +1,3 @@
-package app.banking.utils;
+package bin.utils;
 
 public record ResponseError(int status, String message) {}
