@@ -96,7 +96,7 @@ public class AddictRepository<T> {
               .getRefTableDefinition()
               .getColumnIdentity()
               .getField()
-              .get(column)
+              .get(columnValue)
           );
         }else {
           entries.put(column.getName(), columnValue);
