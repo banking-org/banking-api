@@ -2,7 +2,11 @@ package postgres.addict;
 
 import lombok.SneakyThrows;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +39,11 @@ public class CommonRepository<T, R> extends AddictRepository<T> {
       if(value instanceof Enum<?>){
         statement.setObject(i+1, ((Enum<?>) value).name());
       }else {
+        if(value instanceof Instant){
+          value = Timestamp.from((Instant) value);
+        }else if (value instanceof LocalDate){
+          value = Date.valueOf((LocalDate) value);
+        }
         statement.setObject(i+1, value);
       }
     }
