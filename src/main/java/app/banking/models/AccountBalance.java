@@ -15,13 +15,13 @@ import java.time.Instant;
 @Table(name="account_balance")
 public class AccountBalance {
   @Column(identity=true, generative= GenerativeValue.SEQUENCE)
-  public Long id;
+  private Long id;
 
   @Column(name="current_balance")
   private Double currentBalance;
 
   @Column(name="id_account", references=true, required=true)
-  public Account idAccount;
+  private Account idAccount;
 
   @Column(name="checked_at", defaultValue="now()")
   private Instant checkedAt;
