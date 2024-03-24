@@ -8,6 +8,7 @@ import app.banking.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -79,8 +80,10 @@ public class AccountService {
   }
 
   public Optional<AccountData> edit(Long id, UpSetAccountPayload updates){
+    Account account = payloadToAccount(updates);
+    account.setUpdatedAt(Instant.now());
     return repository
-      .updateById(id, payloadToAccount(updates))
+      .updateById(id, account)
       .map(AccountService::accountToDto);
   }
 
