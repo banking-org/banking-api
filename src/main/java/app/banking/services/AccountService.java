@@ -27,6 +27,9 @@ public class AccountService {
     value.setBirthdate(account.getBirthdate());
     value.setBank(account.getBank());
     value.setAccountNumber(account.getAccountNumber());
+    if(value.getAccountNumber() == null){
+      value.setAccountNumber(createAccountNumber());
+    }
     try {
       value.setAccountType(AccountType.valueOf(account.getType()));
     }catch (Exception ignored){
@@ -34,7 +37,18 @@ public class AccountService {
     }
     return value;
   }
-  
+
+  private static String createAccountNumber(){
+    Random rand = new Random();
+    return String.format((Locale) null,
+      "101%02d-%04d-%04d-%04d",
+      rand.nextInt(10),
+      rand.nextInt(10000),
+      rand.nextInt(10000),
+      rand.nextInt(10000)
+    );
+  }
+
   public static AccountData accountToDto(Account account){
     AccountData data = new AccountData();
     data.setId(account.getId());
@@ -42,17 +56,7 @@ public class AccountService {
     data.setFirstname(account.getFirstname());
     data.setBirthdate(account.getBirthdate());
     data.setSalary(account.getNetMonthSalary());
-
-    Random rand = new Random();
-    String number = String.format((Locale) null,
-      "101%02d-%04d-%04d-%04d",
-      rand.nextInt(10),
-      rand.nextInt(10000),
-      rand.nextInt(10000),
-      rand.nextInt(10000)
-    );
-    data.setAccountNumber(number);
-
+    data.setAccountNumber(account.getAccountNumber());
     data.setAccountType(account.getAccountType().name());
     data.setBank(account.getBank());
     data.setUpdatedAt(account.getUpdatedAt());
