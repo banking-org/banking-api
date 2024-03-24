@@ -38,7 +38,6 @@ public class TransactionService {
         transactionRepo
           .findById(id)
           .map(value -> {
-            Transaction transaction = new Transaction();
             if (
               (
                 value.getType() == TransactionType.CREDIT &&
@@ -48,10 +47,10 @@ public class TransactionService {
                 category.getOnlyOn() == TransactionType.DEBIT
               )
             ) {
-              transaction.setCategory(category);
+              value.setCategory(category);
             }
             return transactionRepo
-              .updateById(id, transaction)
+              .updateById(id, value)
               .orElseThrow();
           })
           .orElseThrow()
