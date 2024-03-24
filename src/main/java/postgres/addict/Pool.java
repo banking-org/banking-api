@@ -55,10 +55,25 @@ public class Pool implements ConnectionPool {
   }
 
   @Override
+  @SuppressWarnings("all")
   public Connection getConnection() {
-    Connection connection = connectionPool
-        .remove(connectionPool.size() - 1);
-    usedConnections.add(connection);
+    int size = connectionPool.size();
+    Connection connection;
+    if (size == 0) { // upscale pool
+      // add two more scaling pool
+      connectionPool.add(Pool.createConnection(url, user, password));
+      connectionPool.add(Pool.createConnection(url, user, password));
+      return Pool.createConnection(url, user, password);
+    }else {
+      if(size > 10){ // down scale pool
+        for (int i = 10; i < connectionPool.size(); i++) {
+          connectionPool.remove(i);
+        }
+      }
+      connection = connectionPool
+          .remove(connectionPool.size() - 1);
+      usedConnections.add(connection);
+    }
     return connection;
   }
 
