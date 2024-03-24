@@ -117,9 +117,7 @@ public class TransactionService {
             );
         }
       }
-    }catch (Exception ignored){
-      return null;
-    }
+    }catch (Exception ignored) {}
     return ResponseEntity
       .status(HttpStatus.NOT_ACCEPTABLE)
       .body(new ResponseError(
