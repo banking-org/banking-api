@@ -20,7 +20,7 @@ public class CategoryRepository extends CommonCrud<Category, Long> {
 
   @SneakyThrows
   public List<Category> findAllByType(TransactionType type) {
-    PreparedStatement statement = createStatement("SELECT name FROM @table WHERE only_on = ?");
+    PreparedStatement statement = createStatement("SELECT * FROM @table WHERE only_on = ?");
     statement.setString(1, type.name());
     return resultSetList(statement);
   }
