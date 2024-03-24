@@ -6,6 +6,7 @@ import lombok.SneakyThrows;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
+import java.util.List;
 
 @Repository
 public class CategoryRepository extends CommonCrud<Category, Long> {
@@ -15,5 +16,12 @@ public class CategoryRepository extends CommonCrud<Category, Long> {
     statement.setString(1, name);
     statement.setString(2, type.name());
     return forceResultSet(statement);
+  }
+
+  @SneakyThrows
+  public List<Category> findAllByType(TransactionType type) {
+    PreparedStatement statement = createStatement("SELECT name FROM @table WHERE only_on = ?");
+    statement.setString(1, type.name());
+    return resultSetList(statement);
   }
 }
