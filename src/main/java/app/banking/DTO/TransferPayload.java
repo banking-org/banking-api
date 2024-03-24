@@ -13,7 +13,7 @@ import java.time.LocalDate;
 public class TransferPayload {
   private String label;
   private Double amount;
-  private Instant effectDate;
+  private LocalDate effectDate;
   private Long accountFrom;
   private Long accountTarget;
 }
