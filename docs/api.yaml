@@ -36,8 +36,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/GetAccountDto'
-        404:
-          $ref: '#/components/responses/404'
         500:
           $ref: '#/components/responses/500'
     post:
@@ -57,8 +55,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetAccountDto'
-        404:
-          $ref: '#/components/responses/404'
         500:
           $ref: '#/components/responses/500'
 
@@ -79,8 +75,6 @@ paths:
                 $ref: '#/components/schemas/GetAccountDto'
         400:
           $ref: '#/components/responses/400'
-        404:
-          $ref: '#/components/responses/404'
         500:
           $ref: '#/components/responses/500'
     put:
@@ -99,8 +93,6 @@ paths:
                 $ref: '#/components/schemas/GetAccountDto'
         400:
           $ref: '#/components/responses/400'
-        404:
-          $ref: '#/components/responses/404'
         500:
           $ref: '#/components/responses/500'
 
@@ -125,8 +117,6 @@ paths:
                 $ref: '#/components/schemas/MoneyData'
         400:
           $ref: '#/components/responses/400'
-        404:
-          $ref: '#/components/responses/404'
         500:
           $ref: '#/components/responses/500'
 
@@ -149,8 +139,6 @@ paths:
                 $ref: '#/components/schemas/MoneyData'
         400:
           $ref: '#/components/responses/400'
-        404:
-          $ref: '#/components/responses/404'
         500:
           $ref: '#/components/responses/500'
 
@@ -173,8 +161,6 @@ paths:
                 $ref: '#/components/schemas/MoneyData'
         400:
           $ref: '#/components/responses/400'
-        404:
-          $ref: '#/components/responses/404'
         500:
           $ref: '#/components/responses/500'
 
@@ -198,8 +184,6 @@ paths:
                   $ref: '#/components/schemas/AccountStatement'
         400:
           $ref: '#/components/responses/400'
-        404:
-          $ref: '#/components/responses/404'
         500:
           $ref: '#/components/responses/500'
 
