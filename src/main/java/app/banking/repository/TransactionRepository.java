@@ -16,7 +16,7 @@ import java.util.Optional;
 public class TransactionRepository extends CommonCrud<Transaction, Long> {
   @SneakyThrows
   public List<Transaction> findAllById(Long id){
-    PreparedStatement statement = createStatement("SELECT * FROM @table WHERE @id = ?");
+    PreparedStatement statement = createStatement("SELECT * FROM @table WHERE id_account = ?");
     statement.setObject(1, id);
     return resultSetList(statement);
   }
