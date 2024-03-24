@@ -67,7 +67,7 @@ public class BalanceService {
       })
       .ifPresentOrElse(
         balanceData::setInterests,
-        () -> balanceData.setInterests(0D)
+        () -> balanceData.setInterests(debit * 7 / 100) // 7% by default
       );
     return balanceData;
   }
