@@ -14,5 +14,6 @@ public class GroupTransferPayload {
   private String label;
   private Long accountId;
   private List<Long> targetsId;
+  private double amount; // for each target
   private LocalDate effectDate;
 }
