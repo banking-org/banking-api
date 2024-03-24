@@ -237,33 +237,23 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ResponseErrorPayload'
+            $ref: '#/components/schemas/ResponseError'
           example:
             status: 400
             message: Bad request
-
-    '404':
-      description: resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ResponseErrorPayload'
-          example:
-            status: 404
-            message: resource not found
 
     '500':
       description: Server error
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ResponseErrorPayload'
+            $ref: '#/components/schemas/ResponseError'
           example:
             status: 500
             message: cannot perform operations now
 
   schemas:
-    ResponseErrorPayload:
+    ResponseError:
       description: a blueprint for the response
       type: object
       properties:
