@@ -86,6 +86,10 @@ public class AccountService {
   public Optional<AccountData> edit(Long id, UpSetAccountPayload updates){
     Account account = payloadToAccount(updates);
     account.setUpdatedAt(Instant.now());
+    Account found = repository.findById(id).orElseThrow();
+    if(found.getAccountNumber().isEmpty()){
+      account.setAccountNumber(createAccountNumber());
+    }
     return repository
       .updateById(id, account)
       .map(AccountService::accountToDto);
