@@ -143,11 +143,13 @@ public class TransactionService {
       );
       transaction.setAmount(payload.getAmount());
       LocalDate effect = payload.getEffectDate();
-      if(effect != null){
-        transaction.setEffectDate(effect);
+      transaction.setEffectDate(effect);
+      if(effect != null && !LocalDate.now().equals(effect)){
+        transaction.setStatus(TransactionStatus.PENDING);
+      }else {
+        transaction.setStatus(TransactionStatus.SUCCESS);
       }
       transaction.setType(TransactionType.CREDIT);
-      transaction.setStatus(TransactionStatus.SUCCESS);
       transactionRepo.save(transaction);
 
       Double currentBalance = balanceRepo
