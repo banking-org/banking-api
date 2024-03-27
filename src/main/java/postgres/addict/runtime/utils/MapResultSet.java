@@ -30,7 +30,6 @@ public class MapResultSet<T> {
   public Object mapper(Object value, ColumnDefinition colDef, String column){
     if(colDef.getName().equals(column)){
       Class<?> type = colDef.getField().getType();
-
       if(value instanceof Date && type.equals(LocalDate.class)){
         return ((Date) value).toLocalDate();
       }
@@ -47,10 +46,9 @@ public class MapResultSet<T> {
    */
   @SneakyThrows
   private T getInstance(ResultSet resultSet) {
-    T instance = this.definition.createInstance();
-
     ResultSetMetaData resMeta = resultSet.getMetaData();
     int resLength = resMeta.getColumnCount();
+    T instance = this.definition.createInstance();
 
     for (int i = 1; i <= resLength; i++) {
       String columnName = resMeta.getColumnName(i);
@@ -67,7 +65,7 @@ public class MapResultSet<T> {
           this.tableName.equals(tableName) &&
           orderedColumn.getName().equals(columnName)
         ){
-          if(orderedColumn.isReferences()){
+          if(orderedColumn.isReferences() && columnValue != null){
             TableDefinition<?> refDefinition = orderedColumn.getRefTableDefinition();
             Object refInstance = new MapResultSet<>(refDefinition).getInstance(resultSet);
             if(refInstance != null){
@@ -86,13 +84,15 @@ public class MapResultSet<T> {
           }else {
             Field currentField = orderedColumn.getField();
             Class<?> currentType = currentField.getType();
-            if(
+            if(columnValue != null){
+              if(
                 currentField.isEnumConstant() ||
                 currentType.isEnum()
-            ){
-              currentField.set(instance, this.parseEnum(currentType, columnValue));
-            }else {
-              currentField.set(instance, columnValue);
+              ){
+                currentField.set(instance, this.parseEnum(currentType, columnValue));
+              }else {
+                currentField.set(instance, columnValue);
+              }
             }
           }
         }
