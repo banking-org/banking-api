@@ -2,6 +2,7 @@ package postgres.addict;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -12,7 +13,7 @@ public class Pool implements ConnectionPool {
   @Getter
   static Pool registry;
 
-  private final List<Connection> connectionPool;
+  private List<Connection> connectionPool;
   private final List<Connection> usedConnections = new ArrayList<>();
 
   private final String url;
@@ -59,19 +60,10 @@ public class Pool implements ConnectionPool {
   public Connection getConnection() {
     int size = connectionPool.size();
     Connection connection;
-    if (size == 0) { // upscale pool
-      // add two more scaling pool
-      connectionPool.add(Pool.createConnection(url, user, password));
-      connectionPool.add(Pool.createConnection(url, user, password));
+    if (size == 0) {
       return Pool.createConnection(url, user, password);
     }else {
-      if(size > 10){ // down scale pool
-        for (int i = 10; i < connectionPool.size(); i++) {
-          connectionPool.remove(i);
-        }
-      }
-      connection = connectionPool
-          .remove(connectionPool.size() - 1);
+      connection = connectionPool.remove(size - 1);
       usedConnections.add(connection);
     }
     return connection;
@@ -91,10 +83,15 @@ public class Pool implements ConnectionPool {
     }else {
       connectionPool.add(createConnection(url, user, password));
     }
+    if(connectionPool.size() > 10) this.connectionPool = connectionPool.subList(1, 11);
     return usedConnections.remove(connection);
   }
 
   public int getSize() {
-    return connectionPool.size() + usedConnections.size();
+    return connectionPool.size();
+  }
+
+  public int used(){
+    return usedConnections.size();
   }
 }
