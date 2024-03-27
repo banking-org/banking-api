@@ -1,10 +1,11 @@
 package app.banking.repository;
 
+import app.banking.models.Account;
 import app.banking.models.AccountBalance;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Repository;
+import postgres.addict.Queries;
 
-import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -12,18 +13,28 @@ import java.util.Optional;
 public class BalanceRepository extends CommonCrud<AccountBalance, Long> {
   @SneakyThrows
   public Optional<AccountBalance> findCurrentByAccountId(Long id){
-    PreparedStatement statement = createStatement(
-      "SELECT * FROM @table WHERE id_account = ? ORDER BY checked_at DESC"
+    return optionalFromQueries(Queries
+      .select()
+      .innerJoin(AccountBalance.class, Account.class)
+      .where()
+        .equals("id_account", id)
+      .end()
+      .orderBy()
+        .addDesc("checked_at")
+      .end()
     );
-    statement.setObject(1, id);
-    return resultSetOptional(statement);
   }
 
   @SneakyThrows
   public Optional<AccountBalance> findAtDateByAccountId(Long id, LocalDate date){
-    PreparedStatement statement = createStatement("SELECT * FROM @table WHERE id_account = ? AND checked_at = ?");
-    statement.setObject(1, id);
-    statement.setObject(2, date);
-    return resultSetOptional(statement);
+    return optionalFromQueries(Queries
+      .select()
+      .innerJoin(AccountBalance.class, Account.class)
+      .where()
+        .equals("id_account", id)
+        .and()
+        .equals("checked_at", date)
+      .end()
+    );
   }
 }

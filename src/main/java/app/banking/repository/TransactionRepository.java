@@ -1,32 +1,49 @@
 package app.banking.repository;
 
 import app.banking.DTO.StateItem;
-import app.banking.models.Transaction;
+import app.banking.models.*;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Repository;
+import postgres.addict.Queries;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static app.banking.models.TransactionStatus.NO_PAYED;
+
 @Repository
 public class TransactionRepository extends CommonCrud<Transaction, Long> {
   @SneakyThrows
   public List<Transaction> findAllById(Long id){
-    PreparedStatement statement = createStatement("SELECT * FROM @table WHERE id_account = ?");
-    statement.setObject(1, id);
-    return resultSetList(statement);
+    return listFromQueries(Queries
+      .selectDistinct()
+      .innerJoin(Transaction.class, Account.class, "id_account")
+      .leftJoin(Transaction.class, Account.class, "receiver")
+      .leftJoin(Transaction.class, Category.class)
+      .leftJoin(Transaction.class, TransactionGroup.class)
+      .where()
+        .equals("\"@table\".id_account", id)
+      .end()
+    );
   }
 
   @SneakyThrows
   public Double findSumOfNoPayedByAccountId(Long id){
-    String sql = "SELECT sum(amount) as total FROM @table WHERE id_account = ? AND status = 'NO_PAYED'";
-    try(PreparedStatement statement = createStatement(sql)){
-      statement.setObject(1, id);
-      ResultSet resultSet = statement.executeQuery();
+    Queries queries = Queries
+      .select(Queries
+        .aliasColumns()
+        .add("sum(amount)", "total")
+        .toQuery()
+      )
+      .where()
+      .equals("id_account", id)
+      .and()
+      .equals("status", NO_PAYED)
+      .end();
+    try (ResultSet resultSet = executeQueries(queries)) {
       if (resultSet.next()) {
         return resultSet.getDouble("total");
       }
@@ -36,11 +53,20 @@ public class TransactionRepository extends CommonCrud<Transaction, Long> {
 
   @SneakyThrows
   public Double findSumOfNoPayedByAccountIdAtDate(Long id, LocalDate date){
-    String sql = "SELECT sum(amount) as total FROM @table WHERE id_account = ? AND status = 'NO_PAYED' AND created_at = ?";
-    try(PreparedStatement statement = createStatement(sql)){
-      statement.setObject(1, id);
-      statement.setObject(2, date);
-      ResultSet resultSet = statement.executeQuery();
+    Queries query = Queries
+      .select(Queries
+        .aliasColumns()
+          .add("sum(amount)", "total")
+        .toQuery()
+      )
+      .where()
+        .equals("id_account", id)
+        .and()
+        .equals("status", NO_PAYED)
+        .and()
+        .equals("created_at", date)
+      .end();
+    try (ResultSet resultSet = executeQueries(query)){
       if (resultSet.next()) {
         return resultSet.getDouble("total");
       }
@@ -50,11 +76,18 @@ public class TransactionRepository extends CommonCrud<Transaction, Long> {
 
   @SneakyThrows
   public Optional<Transaction> findLastNotPaidByAccountId(Long id){
-    PreparedStatement statement = createStatement(
-      "SELECT * FROM @table WHERE id_account = ? AND status = 'NO_PAYED' ORDER BY created_at DESC LIMIT 1"
+    return optionalFromQueries(Queries
+      .select()
+      .where()
+        .equals("id_account", id)
+        .and()
+        .equals("status", NO_PAYED)
+      .end()
+        .orderBy()
+        .addDesc("created_at")
+      .end()
+      .limit(1)
     );
-    statement.setObject(1, id);
-    return resultSetOptional(statement);
   }
 
   @SneakyThrows
@@ -63,27 +96,28 @@ public class TransactionRepository extends CommonCrud<Transaction, Long> {
     LocalDate start,
     LocalDate end
   ){
+    Queries query = Queries
+      .select(
+        Queries
+        .aliasColumns()
+          .add("effect_date", "date")
+          .add("concat('VIR_', upper(\"effect_date\"::text))", "reference")
+          .noAlias("label")
+          .add("sum(CASE type WHEN 'CREDIT' THEN abs(amount) ELSE 0 END)", "credit")
+          .add("sum(CASE type WHEN 'DEBIT' THEN abs(amount) ELSE 0 END)", "debit")
+          .add("sum(current_balance)", "balance")
+        .toQuery()
+      )
+      .leftJoin(Transaction.class, AccountBalance.class, "id_account")
+      .where()
+        .equals("\"transaction\".id_account", accountId)
+        .and()
+        .between("created_at", start, end)
+      .end()
+      .groupBy("label", "current_balance", "effect_date")
+    ;
     List<StateItem> items = new ArrayList<>();
-    String sql = """
-      SELECT
-          "effect_date" as date,
-          concat('VIR_', upper("effect_date"::text)) as reference,
-          label,
-          sum(CASE type WHEN 'CREDIT' THEN abs(amount) ELSE 0 END) as credit,
-          sum(CASE type WHEN 'DEBIT' THEN abs(amount) ELSE 0 END) as debit,
-          sum("current_balance") as balance
-      FROM "transaction"
-      left join public.account_balance ab on transaction."id_account" = ab."id_account"
-      WHERE "transaction"."id_account" = ? AND "created_at" BETWEEN ? AND ?
-      group by label, "current_balance", "effect_date"
-      """;
-
-    try(PreparedStatement statement = createStatement(sql)){
-      statement.setObject(1, accountId);
-      statement.setObject(2, start);
-      statement.setObject(3, end);
-
-      ResultSet resultSet = statement.executeQuery();
+    try(ResultSet resultSet = executeQueries(query)){
       while (resultSet.next()) {
         StateItem item = new StateItem();
         item.setDate(resultSet.getDate("date").toLocalDate());
