@@ -10,6 +10,10 @@ import java.util.stream.Collectors;
 import static postgres.addict.Utils.objectToPsqlValue;
 
 public class Queries {
+  public static Queries of(String query){
+    return new Queries(query);
+  }
+
   public static Insertion insertion(){
     return new Insertion();
   }
