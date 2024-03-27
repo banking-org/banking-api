@@ -87,7 +87,7 @@ public class AccountService {
     Account account = payloadToAccount(updates);
     account.setUpdatedAt(Instant.now());
     Account found = repository.findById(id).orElseThrow();
-    if(found.getAccountNumber().isEmpty()){
+    if(found.getAccountNumber() != null){
       account.setAccountNumber(createAccountNumber());
     }
     return repository
