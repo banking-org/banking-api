@@ -2,59 +2,52 @@ package postgres.addict;
 
 import lombok.SneakyThrows;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 public class CommonRepository<T, R> extends AddictRepository<T> {
+  public Optional<T> save(T value){
+    Queries.Insertion insertion = Queries.insertion();
+    getInsertedValues(value, insertion::value);
+    Queries queries = insertion.end().returns();
+    return optionalFromQueries(queries);
+  }
+
   @SneakyThrows
   public Optional<T> findById(R id){
-    PreparedStatement statement = createStatement("SELECT * FROM @table WHERE @id = ?");
-    statement.setObject(1, id);
-    return resultSetOptional(statement);
+    return optionalFromQueries(Queries
+      .select()
+      .where()
+        .equals("@id", id)
+      .end()
+    );
   }
 
   public List<T> findAll(){
-    return listOfStatement("SELECT * FROM @table");
+    return listFromQueries(Queries.select());
   }
 
   @SneakyThrows
   public Optional<T> updateById(R id, T newValue){
-    HashMap<String, Object> values = getColumnValues(newValue);
-    String params = String.join(",", values.keySet()
-      .stream().map(key -> key + " = ?").toList()
-    );
-    String query = "UPDATE @table SET @params WHERE @id = ? RETURNING *"
-      .replace("@params", params);
-    int valueSize = values.size();
-    PreparedStatement statement = createStatement(query);
-    List<Object> objectValues = values.values().stream().toList();
-    for (int i = 0; i < objectValues.size(); i++) {
-      Object value = objectValues.get(i);
-      if(value instanceof Enum<?>){
-        statement.setObject(i+1, ((Enum<?>) value).name());
-      }else {
-        if(value instanceof Instant){
-          value = Timestamp.from((Instant) value);
-        }else if (value instanceof LocalDate){
-          value = Date.valueOf((LocalDate) value);
-        }
-        statement.setObject(i+1, value);
-      }
-    }
-    statement.setObject(valueSize+1, id);
-    return resultSetOptional(statement);
+    Queries.Updates updates = Queries.update();
+    getInsertedValues(newValue, updates::setUpdate);
+    Queries query = updates
+      .end()
+      .where()
+        .equals("@id", id)
+      .end()
+      .returns();
+    return optionalFromQueries(query);
   }
 
   @SneakyThrows
   public Optional<T> deleteById(R id){
-    PreparedStatement statement = createStatement("DELETE FROM @table WHERE @id = ? RETURNING *");
-    statement.setObject(1, id);
-    return resultSetOptional(statement);
+    return optionalFromQueries(Queries
+      .delete()
+      .where()
+        .equals("@id", id)
+      .end()
+      .returns()
+    );
   }
 }
