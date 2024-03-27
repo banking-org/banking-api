@@ -7,11 +7,9 @@ import postgres.addict.runtime.utils.MapResultSet;
 
 import java.lang.reflect.ParameterizedType;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.*;
 
 /**
  * Do manage queries between java and postgresql. <br>
@@ -31,168 +29,80 @@ public class AddictRepository<T> {
   @SneakyThrows
   @SuppressWarnings("unchecked")
   public AddictRepository(){
-    Class<?> childClass = this.getClass();
-    Class<?> entityClass = this.getEntityClass(childClass);
+    Class<?> entityClass = this.getEntityClass(this.getClass());
     TableDefinition<T> tableDefinition = (TableDefinition<T>) new TableDefinition<>(entityClass);
-    this.tableDefinition = tableDefinition;
-    this.resultSetMapper = new MapResultSet<>(tableDefinition);
-
     this.tableName = tableDefinition.getName();
     this.idColumnName = tableDefinition.getColumnIdentity().getName();
+    this.tableDefinition = tableDefinition;
+    this.resultSetMapper = new MapResultSet<>(tableDefinition);
   }
 
-  protected List<T> listOfStatement(String sql){
-    return resultSetList(createStatement(sql));
-  }
-
-  @SneakyThrows
-  private HashMap<String, Object> getInsertedValues(T value){
-    HashMap<String, Object> entries = new HashMap<>();
-
-    Object idValue = this.getIdValue(value);
-    if(idValue != null){
-      entries.put(this.idColumnName, idValue);
-    }
-
-    for (ColumnDefinition column : this.tableDefinition.getColumns()) {
-      Object columnValue = column.getField().get(value);
-      if(columnValue != null){
-        if(column.isReferences()){
-          Object v = column
+  private void setValues(
+    T values,
+    ColumnDefinition colDef,
+    TreadInsertValue<String, Object> tread
+  ){
+    try {
+      Object v = colDef.getField().get(values);
+      if(v != null){
+        if(colDef.isReferences()){
+          v = colDef
             .getRefTableDefinition()
             .getColumnIdentity()
             .getField()
-            .get(columnValue);
-          if(v instanceof Enum<?>){
-            v = ((Enum<?>) v).name();
-          }
-          entries.put(
-            column.getName(),
-            v
-          );
+            .get(v);
+          tread.tread(colDef.getName(), v);
         }else {
-          if(columnValue instanceof Enum<?>){
-            columnValue = ((Enum<?>) columnValue).name();
-          }
-          entries.put(column.getName(), columnValue);
+          tread.tread(colDef.getName(), v);
         }
       }
+    }catch (Exception ignored){}
+  }
+
+  public void getInsertedValues(T values, TreadInsertValue<String, Object> tread){
+    ColumnDefinition columId = tableDefinition.getColumnIdentity();
+    setValues(values, columId, tread);
+    for (ColumnDefinition column : tableDefinition.getColumns()) {
+      setValues(values, column, tread);
     }
-    return entries;
   }
 
-  @SneakyThrows
-  protected HashMap<String, Object> getColumnValues(T value){
-    HashMap<String, Object> entries = new HashMap<>();
-    List<ColumnDefinition> columnDefinitions = this.tableDefinition.getColumns();
-
-    for (ColumnDefinition column : columnDefinitions) {
-      Object columnValue = column.getField().get(value);
-      if(columnValue != null){
-        if(column.isReferences()){
-          entries.put(
-            column.getName(),
-            column
-              .getRefTableDefinition()
-              .getColumnIdentity()
-              .getField()
-              .get(columnValue)
-          );
-        }else {
-          entries.put(column.getName(), columnValue);
-        }
-      }
-    }
-    return entries;
-  }
-
-  private List<String> createParameters(int size){
-    return Collections.nCopies(size, "?");
-  }
-
-  @SneakyThrows
-  protected Object getIdValue(T value) {
-    return this.tableDefinition.getColumnIdentity().getField().get(value);
-  }
-
-  @SneakyThrows
-  private PreparedStatement createSaveStatement(T value){
-    HashMap<String, Object> inserted = this.getInsertedValues(value);
-
-    String columns = String.join(",", inserted.keySet());
-    String params = String.join(",", createParameters(inserted.size()));
-    String query = "INSERT INTO \"@table\" (" + columns + ") values (" + params + ") RETURNING *";
-    PreparedStatement statement = createStatement(query);
-
-    List<Object> values = inserted.values().stream().toList();
-    for (int i = 0; i < values.size(); i++) {
-      int paramIndex = i+1;
-      Object columnValue = values.get(i);
-      statement.setObject(paramIndex, columnValue);
-    }
-    return statement;
-  }
-
-  public Optional<T> save(T value){
-    return resultSetOptional(createSaveStatement(value));
-  }
-
-  @SneakyThrows
-  protected PreparedStatement createStatement(String sql) {
+  @SuppressWarnings("all")
+  protected ResultSet executeQueries(Queries queries) throws Exception {
     Connection connection = Pool.registry.getConnection();
-    String query = sql
-      .replaceAll("@table", this.tableName)
-      .replaceAll("@id", this.idColumnName)
-      ;
-    return connection.prepareStatement(query);
-  }
-
-  @SneakyThrows
-  protected PreparedStatement createStatement(String sql, T value) {
-    String query = statementWrapper(sql, value);
-    return createStatement(query);
-  }
-
-  private String mapper(Object value){
-    String type = value.getClass().getSimpleName().toLowerCase();
-    System.out.println(value.getClass());
-    return "'" + value + "'::" + type;
-  }
-
-  private String statementWrapper(String sql, T value){
-    String query = sql;
-    HashMap<String, Object> values = getInsertedValues(value);
-    for (String key : values.keySet()) {
-      Object val = values.get(key);
-      query = query.replace(":" + key, mapper(val));
+    try {
+      Statement statement = connection.createStatement();
+      String sql =  queries
+        .toString()
+        .replaceAll("@table", this.tableName)
+        .replaceAll("@id", this.idColumnName);
+      return statement.executeQuery(sql);
+    } finally {
+      Pool.registry.releaseConnection(connection);
     }
-    return query;
   }
 
-  @SneakyThrows
-  protected List<T> resultSetList(PreparedStatement statement){
-    final List<T> result = this
-      .resultSetMapper
-      .enlistResultSet(statement.executeQuery());
-    Pool.registry.releaseConnection(statement.getConnection());
-    return result;
+  protected Optional<T> optionalFromQueries(Queries queries){
+    try {
+      return resultSetMapper.optionalResultSet(executeQueries(queries));
+    }catch (Exception ignored){
+      return Optional.empty();
+    }
   }
 
-  @SneakyThrows
-  protected Optional<T> resultSetOptional(PreparedStatement statement){
-    final Optional<T> result = this
-      .resultSetMapper
-      .optionalResultSet(statement.executeQuery());
-    Pool.registry.releaseConnection(statement.getConnection());
-    return result;
+  protected T objectFromQueries(Queries queries){
+    try {
+      return resultSetMapper.mustBeOneResultSet(executeQueries(queries));
+    }catch (Exception ignored){
+      return null;
+    }
   }
 
-  @SneakyThrows
-  protected T forceResultSet(PreparedStatement statement){
-    final T result = this
-      .resultSetMapper
-      .mustBeOneResultSet(statement.executeQuery());
-    Pool.registry.releaseConnection(statement.getConnection());
-    return result;
+  protected List<T> listFromQueries(Queries queries){
+    try {
+      return resultSetMapper.enlistResultSet(executeQueries(queries));
+    }catch (Exception ignored){
+      return new ArrayList<>();
+    }
   }
 }
