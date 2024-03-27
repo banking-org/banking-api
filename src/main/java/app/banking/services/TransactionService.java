@@ -85,15 +85,17 @@ public class TransactionService {
 
       Transaction transaction = new Transaction();
       transaction.setIdAccount(account);
-      transaction.setAmount(Math.abs(currentDebit));
+      transaction.setAmount(Math.abs(amount));
       transaction.setType(TransactionType.DEBIT);
 
       if(
         ((salary / 3) >= amount && currentBalance >= amount && currentDebit >= 0)
       ){
         transaction.setStatus(TransactionStatus.SUCCESS);
-        transactionRepo.save(transaction);
-        return balanceRepo.save(debits).map(v -> this.toData(v, account));
+        transactionRepo.save(transaction).orElseThrow();
+        return balanceRepo
+          .save(debits)
+          .map(v -> this.toData(v, account));
       }else if(
         (account.getAccountType() == AccountType.DEBIT) &&
         currentDebit < 0
@@ -105,7 +107,9 @@ public class TransactionService {
         ) {
           transaction.setStatus(TransactionStatus.NO_PAYED);
           transactionRepo.save(transaction);
-          return balanceRepo.save(debits).map(v -> this.toData(v, account));
+          return balanceRepo
+            .save(debits)
+            .map(v -> this.toData(v, account));
         }else {
           return ResponseEntity
             .badRequest()
