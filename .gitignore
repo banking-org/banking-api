@@ -38,3 +38,6 @@ out/
 
 ## env file
 .env
+
+## generated migration files
+src/main/resources/migrations/*.sql
