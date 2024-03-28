@@ -6,56 +6,79 @@ import lombok.ToString;
 import postgres.addict.Table;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import static postgres.addict.Utils.spaceToSnakeCase;
+import static postgres.addict.Utils.toSnakeCase;
+import static postgres.addict.Utils.stringAorB;
 
 
-@Getter
 @ToString
 @EqualsAndHashCode
 public class TableDefinition<T> {
+  @Getter
   private final String name;
+  @Getter
   private final String schema;
-  private final List<ColumnDefinition> columns = new ArrayList<>();
+  @Getter
   private final Class<T> clazz;
-  private ColumnDefinition columnIdentity;
+  private final HashMap<String, ColumnDefinition> columns = new HashMap<>();
 
   public TableDefinition(Class<T> clazz) throws Exception {
-    Table table = clazz.getAnnotation(Table.class);
-    if (table != null) {
+    if (clazz.isAnnotationPresent(Table.class)) {
       this.clazz = clazz;
-      String name = spaceToSnakeCase(table.name());
+      Table table = clazz.getAnnotation(Table.class);
+      this.name = toSnakeCase(
+        stringAorB(
+          table.name(),
+          clazz.getSimpleName()
+        )
+        .toLowerCase()
+      );
+      this.schema = stringAorB(table.schema(), "public");
 
-      if (name.isEmpty()) {
-        name = clazz.getSimpleName().toLowerCase();
-      }
-
-      this.name = name;
-      this.schema = table.schema().isEmpty() ? "public" : table.schema();
       Field[] fields = clazz.getDeclaredFields();
-
       for (Field field : fields) {
         ColumnDefinition columnDef = new ColumnDefinition(field);
         if (columnDef.isColumn()) {
           if (columnDef.isIdentity()) {
-            if (this.columnIdentity != null) {
+            ColumnDefinition columnIdentity = this.columns.get("0");
+            if (columnIdentity != null) {
               throw new Exception("Table: " + this.name + " has already one column used for primary key");
             }
-            this.columnIdentity = columnDef;
+            this.columns.put("0", columnDef);
           } else {
-            this.columns.add(columnDef);
+            this.columns.put(columnDef.getName(), columnDef);
           }
         }
       }
-      if (this.columnIdentity == null) {
+      if (this.columns.get("0") == null) {
         throw new Exception("Table: " + this.name + " doesn't contain column used for primary key");
       }
       return;
     }
-
     throw new Exception("class: " + clazz.getName() + " doesn't have annotation @Table");
+  }
+
+  public ColumnDefinition getColumnIdentity(){
+    return this.columns.get("0");
+  }
+
+  public List<ColumnDefinition> getColumns(){
+    return List.copyOf(this.columns.values());
+  }
+
+  public ColumnDefinition getColumn(String name){
+    if(this.columns.get("0").getName().equals(name)){
+      return this.columns.get("0");
+    }
+    return this.columns.get(name);
+  }
+
+  public boolean hasColumn(String name){
+    return
+      this.columns.get(name) != null ||
+      this.columns.get("0").getName().equals(name);
   }
 
   @SuppressWarnings("all")

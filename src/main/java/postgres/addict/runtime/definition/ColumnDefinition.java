@@ -8,6 +8,9 @@ import postgres.addict.*;
 
 import java.lang.reflect.Field;
 
+import static postgres.addict.Utils.stringAorB;
+import static postgres.addict.Utils.toSnakeCase;
+
 @ToString
 @Getter
 @EqualsAndHashCode
@@ -35,18 +38,19 @@ public class ColumnDefinition {
   private TableDefinition<?> refTableDefinition;
 
   public ColumnDefinition(Field field) {
-    field.setAccessible(true);
     this.field = field;
-    final Column column = field.getAnnotation(Column.class);
-    if (column != null) {
-      String columnName = Utils.spaceToSnakeCase(column.name());
-      if (columnName.isEmpty()) {
-        columnName = field.getName();
-      }
-      this.name = columnName;
+    if (field.isAnnotationPresent(Column.class)) {
+      this.column = true;
+      field.setAccessible(true);
+      Column column = field.getAnnotation(Column.class);
+      this.name = toSnakeCase(
+        stringAorB(
+          column.name(),
+          field.getName()
+        )
+      );
       this.mapType(column, field);
       this.defaultValue = column.defaultValue();
-      this.column = true;
       this.required = column.required();
       this.identity = column.identity();
       this.references = column.references();
