@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static app.banking.models.TransactionStatus.SUCCESS;
+
 @Service
 @RequiredArgsConstructor
 public class TransferService {
@@ -32,6 +34,36 @@ public class TransferService {
   private final TransactionGroupRepo transactionGroupRepo;
   private final TransactionRepository transactionRepo;
   private final BalanceRepository balanceRepo;
+
+  public Optional<Transaction> checkTransfersByAccountId(Long accountId){
+    return transactionRepo
+      .updateStatusByAccountIfPassedEffect(accountId, SUCCESS);
+  }
+
+  public Optional<Transaction> cancel(Long id){
+    return transactionRepo
+      .findById(id)
+      .map(Transaction::getId)
+      .map(transactionRepo::cancelTransaction)
+      .map(v -> {
+        if (v.isPresent()) {
+          Transaction transaction = v.get();
+          Long accountId = transaction.getIdAccount().getId();
+          balanceRepo
+            .findCurrentByAccountId(accountId)
+            .map(a -> a.getCurrentBalance() + transaction.getAmount())
+            .map(Math::abs)
+            .ifPresent(b -> {
+              AccountBalance balance = new AccountBalance();
+              balance.setIdAccount(Account.onlyId(accountId));
+              balance.setCurrentBalance(b);
+              balanceRepo.save(balance);
+            });
+          return transaction;
+        }
+        return null;
+      });
+  }
 
   public Object simpleTransfer(TransferPayload payload){
     double amount = payload.getAmount();
