@@ -1,5 +1,7 @@
 package postgres.addict;
 
+import lombok.NonNull;
+
 import java.sql.*;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -7,7 +9,18 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class Utils {
-  public static String spaceToSnakeCase(String value){
+  public static String stringAorB(String a, @NonNull String b){
+    if(a == null){
+      return b.trim();
+    }
+    String cleanedA = a.trim();
+    if(cleanedA.isEmpty()){
+      return b.trim();
+    }
+    return a.trim();
+  }
+
+  public static String toSnakeCase(String value){
     return value.trim().replace(" ", "_");
   }
 
