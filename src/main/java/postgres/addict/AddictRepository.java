@@ -18,8 +18,9 @@ import java.util.*;
 public class AddictRepository<T> {
   private final TableDefinition<T> tableDefinition;
   private final MapResultSet<T> resultSetMapper;
-  private final String tableName;
-  private final String idColumnName;
+
+  protected final String tableName;
+  protected final String idColumnName;
 
   private Class<?> getEntityClass(Class<?> clazz){
     ParameterizedType d = (ParameterizedType) clazz.getGenericSuperclass();
@@ -60,8 +61,6 @@ public class AddictRepository<T> {
   }
 
   public void getInsertedValues(T values, TreadInsertValue<String, Object> tread){
-    ColumnDefinition columId = tableDefinition.getColumnIdentity();
-    setValues(values, columId, tread);
     for (ColumnDefinition column : tableDefinition.getColumns()) {
       setValues(values, column, tread);
     }
