@@ -12,10 +12,42 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static app.banking.models.TransactionStatus.CANCELED;
 import static app.banking.models.TransactionStatus.NO_PAYED;
 
 @Repository
 public class TransactionRepository extends CommonCrud<Transaction, Long> {
+  @SneakyThrows
+  public Optional<Transaction> updateStatusByAccountIfPassedEffect(Long accountId, TransactionStatus status){
+   Queries queries = Queries
+     .update()
+      .setUpdate("status", status)
+     .end()
+     .where()
+      .openWrap()
+        .lessEquals("planed_at", Queries.of("now()"))
+        .or()
+        .lessEquals("effect_date", Queries.of("now()"))
+      .closeWrap()
+      .and()
+      .equals("id_account", accountId)
+     .end()
+     .returns();
+   return optionalFromQueries(queries);
+  }
+
+  public Optional<Transaction> cancelTransaction(Long id){
+    Queries queries = Queries
+      .update()
+        .setUpdate("status", CANCELED)
+      .end()
+      .where()
+        .equals("id", id)
+      .end()
+      .returns();
+    return optionalFromQueries(queries);
+  }
+
   @SneakyThrows
   public List<Transaction> findAllById(Long id){
     return listFromQueries(Queries
