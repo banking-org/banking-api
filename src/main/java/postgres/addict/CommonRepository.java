@@ -18,7 +18,7 @@ public class CommonRepository<T, R> extends AddictRepository<T> {
     return optionalFromQueries(Queries
       .select()
       .where()
-        .equals("@id", id)
+        .equals(idColumnName, id)
       .end()
     );
   }
@@ -34,7 +34,7 @@ public class CommonRepository<T, R> extends AddictRepository<T> {
     Queries query = updates
       .end()
       .where()
-        .equals("@id", id)
+        .equals(idColumnName, id)
       .end()
       .returns();
     return optionalFromQueries(query);
@@ -45,7 +45,7 @@ public class CommonRepository<T, R> extends AddictRepository<T> {
     return optionalFromQueries(Queries
       .delete()
       .where()
-        .equals("@id", id)
+        .equals(idColumnName, id)
       .end()
       .returns()
     );
