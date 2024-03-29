@@ -8,7 +8,7 @@ set these following properties in env variable
 
 **DATABASE_USERNAME**: {USERNAME}
 
-**DATABASE_PASSWORD**: *********Postman collection
+**DATABASE_PASSWORD**: *********
 
 **`NB:`** Make sure the database exists
 
