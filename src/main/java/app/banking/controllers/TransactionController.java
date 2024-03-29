@@ -5,6 +5,7 @@ import app.banking.DTO.TransactionData;
 import app.banking.DTO.WithdrawPayload;
 import app.banking.models.Transaction;
 import app.banking.services.TransactionService;
+import app.banking.services.TransferService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +17,13 @@ import java.util.Optional;
 @RequestMapping("/transaction")
 public class TransactionController {
   private final TransactionService service;
+  private final TransferService transferService;
 
   @GetMapping("/{id}")
   public List<Transaction> getAllAccountTransaction(
     @PathVariable Long id
   ){
+    transferService.checkTransfersByAccountId(id);
     return service.getAllTransaction(id);
   }
 

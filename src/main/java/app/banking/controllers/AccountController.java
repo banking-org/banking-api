@@ -3,6 +3,7 @@ package app.banking.controllers;
 import app.banking.DTO.AccountData;
 import app.banking.DTO.UpSetAccountPayload;
 import app.banking.services.AccountService;
+import app.banking.services.TransferService;
 import app.banking.utils.ResponseError;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.Optional;
 @RequestMapping("/account")
 public class AccountController {
   private final AccountService service;
+  private final TransferService transferService;
 
   @GetMapping
   public List<AccountData> getAll(){
@@ -28,6 +30,7 @@ public class AccountController {
   public Optional<AccountData> getOne(
     @PathVariable Long id
   ){
+    transferService.checkTransfersByAccountId(id);
     return service.getOne(id);
   }
 
